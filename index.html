@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <link rel="stylesheet" href="./style.css"> -->
+    <style>
+        .txt{white-space:pre;font-family: 'Malgun Gothic';font-size: 16px;flex-grow:1;flex-shrink:0;flex-basis:0;height:200px;border:1px solid gray;}
+        del {
+            text-decoration: none;
+            color: #b30000;
+            background: #fadad7;
+        }
+        ins {
+            background: #eaf2c2;
+            color: #406619;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body cz-shortcut-listen="true">
+    <a href="https://github.com/kpdecker/jsdiff" class="source">github.com/kpdecker/jsdiff</a>
+    <a href="http://incaseofstairs.com/jsdiff/">http://incaseofstairs.com/jsdiff/</a>
+    <a href="https://jsfiddle.net/ARTsinn/MQdFw/">https://jsfiddle.net/ARTsinn/MQdFw/</a>
+    <br>
+    <h1 style="display:inline-block;">Diff</h1><span>변경된 곳 : </span><span id="count"></span>
+    <div id="settings">        
+        <label><input type="radio" name="diff_type" value="diffChars" checked=""> Chars</label>
+        <label><input type="radio" name="diff_type" value="diffWords"> Words</label>
+        <label><input type="radio" name="diff_type" value="diffLines"> Lines</label>
+    </div>
+    <div style="display:flex;">
+        <textarea class="txt" id="a">
+    I am a boy.
+    We are the world.
+    That is a bird.
+    You are a girl.
+        </textarea>
+        <textarea class="txt" id="b">
+    I am a boy.
+    This is a book.
+    They are students.
+    You are a girl.
+        </textarea>            
+    </div>
+    <div style="display:flex;">
+        <div class="txt" id="result_before"></div>
+        <div class="txt" id="result_after"></div>
+    </div>
+    <div class="txt" id="result"></div>
+    <script src="./diff.js"></script>
+    <script>
+    var a = document.getElementById('a');
+    var b = document.getElementById('b');
+    var result = document.getElementById('result');
+    var result_before = document.getElementById('result_before');
+    var result_after = document.getElementById('result_after');
+    var count;
+    var count_el;
+    function changed() {        
+        var diff = JsDiff[window.diffType](a.value, b.value);
+          
+        result.textContent = '';
+        result.appendChild(convertHTML(diff));
+
+        result_before.textContent = '';
+        result_before.appendChild(convertHTMLBefore(diff));
+
+        result_after.textContent = '';
+        result_after.appendChild(convertHTMLAfter(diff));
+        
+        count = diffCount(result_before, result_after);      
+        count_el = document.getElementById('count');
+        count_el.textContent = count;
+    }
+    function diffCount(output_old, output_new){
+      console.log(output_old.getElementsByTagName("del").length, output_new.getElementsByTagName("ins").length);
+      var old_count = output_old.getElementsByTagName("del").length;
+      var new_count = output_new.getElementsByTagName("ins").length;
+      var count = 0;
+      if(old_count >= new_count){
+        count = old_count;
+      }else{
+        count = new_count;
+      }
+      return count;
+    }
+    function convertHTML(diff){
+        var fragment = document.createDocumentFragment();
+        for (var i=0; i < diff.length; i++) {
+    
+            if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
+                var swap = diff[i];
+                diff[i] = diff[i + 1];
+                diff[i + 1] = swap;
+            }
+    
+            var node;
+            if (diff[i].removed) {
+                node = document.createElement('del');
+                node.appendChild(document.createTextNode(diff[i].value));
+            } else if (diff[i].added) {
+                node = document.createElement('ins');
+                node.appendChild(document.createTextNode(diff[i].value));
+            } else {
+                node = document.createTextNode(diff[i].value);
+            }
+            fragment.appendChild(node);
+        }
+        return fragment;
+    }
+    
+    function convertHTMLBefore(diff){
+        var fragment = document.createDocumentFragment();
+        for (var i=0; i < diff.length; i++) {
+    
+            if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
+                var swap = diff[i];
+                diff[i] = diff[i + 1];
+                diff[i + 1] = swap;
+            }
+    
+            var node;
+            console.log(diff[i]);
+            if (diff[i].removed) {
+                node = document.createElement('del');
+                node.appendChild(document.createTextNode(diff[i].value));            
+            } 
+            if(!diff[i].added && !diff[i].removed){
+                node = document.createTextNode(diff[i].value);
+            }
+            fragment.appendChild(node);
+        }
+        return fragment;
+    }
+
+    function convertHTMLAfter(diff){
+        var fragment = document.createDocumentFragment();
+        for (var i=0; i < diff.length; i++) {
+    
+            if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
+                var swap = diff[i];
+                diff[i] = diff[i + 1];
+                diff[i + 1] = swap;
+            }
+    
+            var node;
+           
+            if (diff[i].added) {
+                node = document.createElement('ins');
+                node.appendChild(document.createTextNode(diff[i].value));
+            } 
+            if(!diff[i].added && !diff[i].removed){
+                node = document.createTextNode(diff[i].value);
+            }
+            fragment.appendChild(node);
+        }
+        return fragment;
+    }
+
+    window.onload = function() {
+        onDiffTypeChange(document.querySelector('#settings [name="diff_type"]:checked'));
+        changed();
+    };
+    
+    a.onpaste = a.onchange =
+    b.onpaste = b.onchange = changed;
+    
+    if ('oninput' in a) {
+        a.oninput = b.oninput = changed;
+    } else {
+        a.onkeyup = b.onkeyup = changed;
+    }
+    
+    function onDiffTypeChange(radio) {
+        window.diffType = radio.value;
+        document.title = "Diff " + radio.value.slice(4);
+    }
+    
+    var radio = document.getElementsByName('diff_type');
+    for (var i = 0; i < radio.length; i++) {
+        radio[i].onchange = function(e) {
+            onDiffTypeChange(e.target);
+            changed();
+        }
+    }
+    </script>
+    
+    
+    </body>
+</html>

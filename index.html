@@ -6,7 +6,7 @@
     <title>Document</title>
     <!-- <link rel="stylesheet" href="./style.css"> -->
     <style>
-        .txt{white-space:pre;font-family: 'Malgun Gothic';font-size: 16px;flex-grow:1;flex-shrink:0;flex-basis:0;height:200px;border:1px solid gray;}
+        .txt{white-space:pre;font-family: 'Malgun Gothic';font-size: 16px;flex-grow:1;flex-shrink:0;flex-basis:0;height:200px;border:1px solid gray;overflow-y: scroll;}
         del {
             text-decoration: none;
             color: #b30000;
@@ -26,8 +26,8 @@
     <br>
     <h1 style="display:inline-block;">Diff</h1><span>변경된 곳 : </span><span id="count"></span>
     <div id="settings">        
-        <label><input type="radio" name="diff_type" value="diffChars" checked=""> Chars</label>
-        <label><input type="radio" name="diff_type" value="diffWords"> Words</label>
+        <label><input type="radio" name="diff_type" value="diffChars"> Chars</label>
+        <label><input type="radio" name="diff_type" value="diffWords" checked=""> Words</label>
         <label><input type="radio" name="diff_type" value="diffLines"> Lines</label>
     </div>
     <div style="display:flex;">
